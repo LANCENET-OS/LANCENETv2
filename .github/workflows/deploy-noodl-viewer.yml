@@ -21,8 +21,8 @@ jobs:
  #     - name: Install dependencies
  #       run: npm install
 
-      - name: Build Noodl Viewer
-        run: npm run build:editor:_viewer
+ #     - name: Build Noodl Viewer
+ #       run: npm run build:editor:_viewer
 
       - name: Upload Noodl Viewer to GitHub Pages
         uses: actions/upload-pages-artifact@v3
