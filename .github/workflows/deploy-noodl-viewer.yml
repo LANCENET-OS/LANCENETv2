@@ -1,0 +1,35 @@
+name: Deploy Noodl Viewer to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Noodl Viewer
+        run: npm run build:editor:_viewer
+
+      - name: Upload Noodl Viewer to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: "noodl-viewer"
+          path: "path-to-noodl-viewer-files"
+          retention-days: "12"
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
