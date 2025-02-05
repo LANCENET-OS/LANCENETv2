@@ -1,40 +1,148 @@
-name: Deploy Static Site to GitHub Pages
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
   push:
-    branches: [ main ]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build_and_deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
+
     steps:
-      # Check out the repository
-      - name: Checkout repository
+      # 1) Check out your repo
+      - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Copy all repository files to the "public" folder,
-      # excluding directories that should not be deployed.
-      - name: Prepare public folder
+      # 2) Configure Git (so we can commit the removal of the random-named ZIP)
+      - name: Configure Git identity
         run: |
-          mkdir public
-          # Use rsync to copy files, excluding the public folder, .git, and .github directories
-          rsync -av --progress . public --exclude public --exclude '.git*' --exclude '.github'
-          # Create a .nojekyll file so GitHub Pages will not process files with Jekyll
-          touch public/.nojekyll
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Upload the "public" folder as the Pages deployment artifact
+      # 3) Find the newly uploaded 'lancenet.net.*.zip', copy it locally,
+      #    then remove that file from the repo
+      - name: Copy new ZIP to lancenet.net.zip, then remove original from repo
+        run: |
+          # Use 'find' to locate a file like: lancenet.net.something.zip
+          NEW_FILE=$(find . -type f -name "lancenet.net.*.zip" ! -name "lancenet.net.zip" | head -n 1)
+
+          if [ -n "$NEW_FILE" ]; then
+            echo "Found new uploaded ZIP: $NEW_FILE"
+
+            # Copy it locally to 'lancenet.net.zip' for further use
+            cp "$NEW_FILE" lancenet.net.zip
+
+            # Remove the newly uploaded file from the repo so we don't keep it
+            git rm -f "$NEW_FILE"
+            git commit -m "Remove the newly uploaded random ZIP file from the repo"
+            git push origin main
+
+          else
+            echo "No new 'lancenet.net.*.zip' found."
+          fi
+
+      # 4) (Optional) Remove the old local ZIP if you want
+      #    This won't remove it from the repo, just from the runner's workspace
+      - name: Remove old local lancenet.net.zip (optional)
+        if: always()  # only if you want to ensure no leftover local zip
+        run: |
+          if [ -f "lancenet.net.zip" ]; then
+            echo "We DO have a local 'lancenet.net.zip' from previous steps. We'll keep it or remove it as needed."
+            # If you want to remove it, uncomment:
+            # rm -f lancenet.net.zip
+          fi
+
+      # 5) (Optional) Install unzip so we can extract the new 'lancenet.net.zip'
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      # 6) Extract the newly created 'lancenet.net.zip'
+      - name: Extract the ZIP file
+        run: |
+          if [ -f "lancenet.net.zip" ]; then
+            echo "Extracting new 'lancenet.net.zip' for our build..."
+            unzip lancenet.net.zip -d ./
+            ls -la
+          else
+            echo "No lancenet.net.zip to extract."
+          fi
+
+      # 7) Increment SITEVERSION (optional)
+      - name: Increment SITEVERSION
+        id: siteversion
+        run: |
+          VERSION_FILE="version.txt"
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "Error: version.txt not found!" >&2
+            exit 1
+          fi
+          CURRENT_VERSION=$(cat "$VERSION_FILE")
+          echo "Current SITEVERSION: $CURRENT_VERSION"
+          NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{printf "%d.%d.%d\n", $1, $2, $3+1}')
+          echo "$NEW_VERSION" > "$VERSION_FILE"
+          echo "SITEVERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      # 8) Commit updated version.txt
+      - name: Commit updated SITEVERSION
+        run: |
+          git add version.txt
+          git commit -m "Increment SITEVERSION to ${{ env.SITEVERSION }}" || echo "No changes to commit."
+          git push origin main
+
+      # 9) Replace SITEVERSION in 'index.html'
+      - name: Replace SITEVERSION in 'index.html'
+        uses: thiagodnf/string-replacer@v1.0.2
+        with:
+          find: 'SITEVERSION'
+          replace: '${{ env.SITEVERSION }}'
+          include: 'index.html'
+
+      # 10) Get commit count for UPLOADVERSION
+      - name: Get commit count for UPLOADVERSION
+        id: commit_count
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          echo "UPLOADVERSION=$COMMIT_COUNT" >> $GITHUB_ENV
+
+      # 11) Replace UPLOADVERSION in 'index.html'
+      - name: Replace UPLOADVERSION in 'index.html'
+        uses: thiagodnf/string-replacer@v1.0.2
+        with:
+          find: 'UPLOADVERSION'
+          replace: '${{ env.UPLOADVERSION }}'
+          include: 'index.html'
+
+      - name: Display index.html
+        run: cat index.html
+
+      # 12) Setup Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 13) Build with Jekyll
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      # 14) Upload artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
 
-      # Deploy the artifact to GitHub Pages
+      # 15) Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
