@@ -89,4 +89,5 @@ jobs:
             exit 1
           fi
           CURRENT_VERSION=$(cat "$VERSION_FILE")
-          echo "Current SITEVERSION: $CURRENT
+          echo "Current SITEVERSION: $CURRENT_VERSION"
+      
