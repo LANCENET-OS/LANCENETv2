@@ -3,14 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <title>LANCENETv2</title>
-
 
     <style>
       body {
@@ -55,24 +51,47 @@
 
     <div id="root"></div>
 
-    <script src="/react.production.min.js"></script>
-    <script src="/react-dom.production.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
-    <script src="/index-edf2544b927b2c89.js"></script>
-<script>
-(function () {
-  Noodl.Env['BaseUrl'] = '/';
-})();
-</script>
-
+    <!-- ✅ Fixed: Use Relative Paths -->
+    <script src="./react.production.min.js"></script>
+    <script src="./react-dom.production.min.js"></script>
     
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    
+    <!-- ✅ Dynamically Load the Latest JavaScript File -->
+    <script>
+      fetch("./asset-manifest.json")
+        .then(response => response.json())
+        .then(manifest => {
+          if (manifest["index.js"]) {
+            const script = document.createElement("script");
+            script.src = manifest["index.js"];
+            document.body.appendChild(script);
+          } else {
+            console.error("❌ index.js not found in asset-manifest.json");
+          }
+        })
+        .catch(error => console.error("❌ Failed to load index.js:", error));
+    </script>
 
-    <script src="/noodl.deploy.js"></script>
+    <script>
+      (function () {
+        Noodl.Env['BaseUrl'] = './';
+      })();
+    </script>
+
+    <!-- ✅ Fixed: Use Relative Path -->
+    <script src="./noodl.deploy.js"></script>
+
+    <!-- ✅ Fix: Check If Noodl Exists Before Using -->
     <script type="application/javascript">
       document.addEventListener("DOMContentLoaded", function () {
         const root = document.getElementById("root");
-        window.Noodl._viewerReact.renderDeployed(root, __noodl_modules, window.projectData);
+
+        if (window.Noodl && window.Noodl._viewerReact) {
+          window.Noodl._viewerReact.renderDeployed(root, __noodl_modules, window.projectData);
+        } else {
+          console.error("❌ Noodl is not defined. Check if noodl.deploy.js is loading correctly.");
+        }
       });
     </script>
   </body>
