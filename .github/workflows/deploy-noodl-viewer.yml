@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           name: "noodl-viewer"
-          path: "path-to-noodl-viewer-files"
+          path: "LANCENETv2/"
           retention-days: "12"
 
       - name: Deploy to GitHub Pages
