@@ -7,17 +7,17 @@
   xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
 >
   <url>
-    <loc>//home</loc>
+    <loc>https://lancenet-os.github.io/LANCENETv2//landing_page</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>//settings</loc>
+    <loc>https://lancenet-os.github.io/LANCENETv2//settings</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>//profile</loc>
+    <loc>https://lancenet-os.github.io/LANCENETv2//profile</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
