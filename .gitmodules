@@ -1,0 +1,3 @@
+[submodule "LANCENETv2"]
+    path = LANCENETv2
+    url = https://github.com/LANCENET-OS/LANCENETv2.git
