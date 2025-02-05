@@ -3,10 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
 
-    <title>Noodl Viewer</title>
+    <title>LANCENETv2</title>
+<base href="https://lancenet-os.github.io/LANCENETv2/" target="_blank" />
+
 
     <style>
       body {
@@ -51,31 +56,24 @@
 
     <div id="root"></div>
 
-    <!-- ✅ Fixed: Use Relative Paths -->
-    <script src="./react.production.min.js"></script>
-    <script src="./react-dom.production.min.js"></script>
-    
+    <script src="https://lancenet-os.github.io/LANCENETv2/react.production.min.js"></script>
+    <script src="https://lancenet-os.github.io/LANCENETv2/react-dom.production.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <script src="https://lancenet-os.github.io/LANCENETv2/index-40c8a37866e71a8e.js"></script>
+<script>
+(function () {
+  Noodl.Env['BaseUrl'] = 'https://lancenet-os.github.io/LANCENETv2/';
+})();
+</script>
+
     
-    <!-- ✅ Fixed: Ensure This File Exists -->
-    <script src="./index-e4f161fdecdef792.js"></script>
-    <script>
-      (function () {
-        Noodl.Env['BaseUrl'] = './';
-      })();
-    </script>
 
-    <!-- ✅ Fixed: Ensure This File Exists -->
-    <script src="./noodl.deploy.js"></script>
-
+    <script src="https://lancenet-os.github.io/LANCENETv2/noodl.deploy.js"></script>
     <script type="application/javascript">
       document.addEventListener("DOMContentLoaded", function () {
         const root = document.getElementById("root");
-        if (window.Noodl && window.Noodl._viewerReact) {
-          window.Noodl._viewerReact.renderDeployed(root, __noodl_modules, window.projectData);
-        } else {
-          console.error("❌ Noodl is not defined. Check if noodl.deploy.js is loading correctly.");
-        }
+        window.Noodl._viewerReact.renderDeployed(root, __noodl_modules, window.projectData);
       });
     </script>
   </body>
